@@ -1,0 +1,252 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "0d89d67b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt\n",
+    "import plotly.graph_objects as go\n",
+    "import plotly.express as px\n",
+    "\n",
+    "from warnings import filterwarnings\n",
+    "filterwarnings('ignore')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "614ddf52",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Sentiment</th>\n",
+       "      <th>Text</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>neutral</td>\n",
+       "      <td>According to Gran , the company has no plans t...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>neutral</td>\n",
+       "      <td>Technopolis plans to develop in stages an area...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>negative</td>\n",
+       "      <td>The international electronic industry company ...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>positive</td>\n",
+       "      <td>With the new production plant the company woul...</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>positive</td>\n",
+       "      <td>According to the company 's updated strategy f...</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Sentiment                                               Text\n",
+       "0   neutral  According to Gran , the company has no plans t...\n",
+       "1   neutral  Technopolis plans to develop in stages an area...\n",
+       "2  negative  The international electronic industry company ...\n",
+       "3  positive  With the new production plant the company woul...\n",
+       "4  positive  According to the company 's updated strategy f..."
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df = pd.read_csv(r'C:\\Users\\ASUS\\Desktop\\k2 2023-2024\\Các hệ thống thông tin nâng cao/Sentiment_data.csv', encoding='latin1')\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "aa9960d3",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from collections import defaultdict"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "d75f0a8b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import scipy\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt\n",
+    "from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score\n",
+    "import torch\n",
+    "from transformers import AutoTokenizer, AutoModelForSequenceClassification"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "5f1762bb",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = df['Text'].to_list()\n",
+    "y = df['Sentiment'].to_list()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "9328342e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "tokenizer = AutoTokenizer.from_pretrained(\"ProsusAI/finbert\")\n",
+    "model = AutoModelForSequenceClassification.from_pretrained(\"ProsusAI/finbert\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "8f391968",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "preds = []\n",
+    "preds_proba = []\n",
+    "tokenizer_kwargs = {\"padding\": True, \"truncation\": True, \"max_length\": 512}\n",
+    "for x in X:\n",
+    "    with torch.no_grad():\n",
+    "        input_sequence = tokenizer(x, return_tensors=\"pt\", **tokenizer_kwargs)\n",
+    "        logits = model(**input_sequence).logits\n",
+    "        scores = {\n",
+    "        k: v\n",
+    "        for k, v in zip(\n",
+    "            model.config.id2label.values(),\n",
+    "            scipy.special.softmax(logits.numpy().squeeze()),\n",
+    "        )\n",
+    "    }\n",
+    "    sentimentFinbert = max(scores, key=scores.get)\n",
+    "    probabilityFinbert = max(scores.values())\n",
+    "    preds.append(sentimentFinbert)\n",
+    "    preds_proba.append(probabilityFinbert)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "5fc1abb8",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Accuracy-Score: 0.8893933140734627\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(f'Accuracy-Score: {accuracy_score(y, preds)}')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "425cd3ba",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "              precision    recall  f1-score   support\n",
+      "\n",
+      "    negative       0.80      0.97      0.88       604\n",
+      "     neutral       0.96      0.86      0.91      2879\n",
+      "    positive       0.81      0.92      0.86      1363\n",
+      "\n",
+      "    accuracy                           0.89      4846\n",
+      "   macro avg       0.86      0.92      0.88      4846\n",
+      "weighted avg       0.90      0.89      0.89      4846\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(classification_report(y, preds))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "08e08456",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
