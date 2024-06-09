@@ -3,7 +3,7 @@
 
 # In[2]:
 
-import os
+
 import streamlit as st
 import pickle
 import torch
@@ -17,25 +17,21 @@ import pickle
 
 # In[8]:
 
-# Set the paths to the model and tokenizer
-save_directory = r"C:\Users\ASUS\Desktop\k2 2023-2024\Các hệ thống thông tin nâng cao\Final"
-tokenizer_save_path = os.path.join(save_directory, "tokenizer.pkl")
-model_save_path = save_directory
+# Path to the saved model
+model_path = r'C:\Users\ASUS\Desktop\k2 2023-2024\Các hệ thống thông tin nâng cao\Final\FinBERT_model.pth'
 
-# Load the tokenizer
-try:
-    with open(tokenizer_save_path, "rb") as f:
-        tokenizer = pickle.load(f)
-except FileNotFoundError:
-    st.error(f"Error loading the tokenizer: No such file or directory: '{tokenizer_save_path}'")
-    st.stop()
+# Load the tokenizer and model
+tokenizer = AutoTokenizer.from_pretrained("ProsusAI/finbert")
+model = AutoModelForSequenceClassification.from_pretrained("ProsusAI/finbert")
 
-# Load the model
 try:
-    model = AutoModelForSequenceClassification.from_pretrained(model_save_path)
-except FileNotFoundError:
-    st.error(f"Error loading the model: No such file or directory: '{model_save_path}'")
-    st.stop()
+    model.load_state_dict(torch.load(model_path))
+    model.eval()
+except Exception as e:
+    st.error(f"Error loading the model: {e}")
+
+st.title('FinBERT Sentiment Analysis')
+
 
 
 # In[9]:
