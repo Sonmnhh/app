@@ -21,6 +21,10 @@ import pickle
 tokenizer_path = r"C:\Users\ASUS\Desktop\k2 2023-2024\Các hệ thống thông tin nâng cao\Final\tokenizer.pkl"
 model_path = r"C:\Users\ASUS\Desktop\k2 2023-2024\Các hệ thống thông tin nâng cao\Final\finbert_model"
 
+# Debugging: List files in the directory
+st.write("Files in the specified directory:")
+st.write(os.listdir(r"C:\Users\ASUS\Desktop\k2 2023-2024\Các hệ thống thông tin nâng cao\Final"))
+
 # Load the tokenizer
 try:
     with open(tokenizer_path, "rb") as f:
@@ -35,7 +39,6 @@ try:
 except FileNotFoundError:
     st.error(f"Error loading the model: No such file or directory: '{model_path}'")
     st.stop()
-
 
 # In[9]:
 
