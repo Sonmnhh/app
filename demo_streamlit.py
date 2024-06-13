@@ -19,19 +19,20 @@ import requests
 # In[8]:
 
 # Define the URLs for the tokenizer and model
-tokenizer_url = 'https://drive.google.com/file/d/1nM-nXY308A0CtEwAUCq_Mhv5kde6yRO0/view?usp=drive_link'
-model_url = 'https://drive.google.com/file/d/1QiZrC53r_Dqn5160rGvnHGzpzTG0hbqm/view?usp=drive_link'
+tokenizer_url = '1nM-nXY308A0CtEwAUCq_Mhv5kde6yRO0'
+model_url = '1QiZrC53r_Dqn5160rGvnHGzpzTG0hbqm'
 
-# Function to download files
+# Function to download files from Google Drive
 @st.cache_data
-def download_file(url):
+def download_file_from_google_drive(file_id):
+    url = f'https://drive.google.com/uc?export=download&id={file_id}'
     response = requests.get(url)
     response.raise_for_status()
     return response.content
 
 # Download and load the tokenizer
 try:
-    tokenizer_data = download_file(tokenizer_url)
+    tokenizer_data = download_file_from_google_drive(tokenizer_id)
     tokenizer = pickle.loads(tokenizer_data)
 except Exception as e:
     st.error(f"Error loading the tokenizer: {e}")
@@ -39,13 +40,14 @@ except Exception as e:
 
 # Download and load the model
 try:
-    model_data = download_file(model_url)
+    model_data = download_file_from_google_drive(model_id)
     with open('finbert_model.bin', 'wb') as f:
         f.write(model_data)
     model = AutoModelForSequenceClassification.from_pretrained('finbert_model.bin')
 except Exception as e:
     st.error(f"Error loading the model: {e}")
     st.stop()
+
 # In[9]:
 
 
