@@ -24,26 +24,27 @@ model_id = '1QiZrC53r_Dqn5160rGvnHGzpzTG0hbqm'
 
 # Function to download files from Google Drive
 @st.cache_data
-def download_file_from_google_drive(file_id):
+def download_file_from_google_drive(file_id, dest_path):
     url = f'https://drive.google.com/uc?export=download&id={file_id}'
     response = requests.get(url)
     response.raise_for_status()
-    return response.content
+    with open(dest_path, 'wb') as f:
+        f.write(response.content)
 
 # Download and load the tokenizer
 try:
-    tokenizer_data = download_file_from_google_drive(tokenizer_id)
-    tokenizer = pickle.loads(tokenizer_data)
+    tokenizer_data = download_file_from_google_drive(tokenizer_id, 'tokenizer.pkl')
+    with open('tokenizer.pkl', 'rb') as f:
+        tokenizer = pickle.load(f)
 except Exception as e:
     st.error(f"Error loading the tokenizer: {e}")
     st.stop()
 
 # Download and load the model
 try:
-    model_data = download_file_from_google_drive(model_id)
-    with open('finbert_model.bin', 'wb') as f:
-        f.write(model_data)
-    model = AutoModelForSequenceClassification.from_pretrained('finbert_model.bin')
+    os.makedirs('model', exist_ok=True)
+    download_file_from_google_drive(model_id, 'model/pytorch_model.bin')
+    model = AutoModelForSequenceClassification.from_pretrained('model')
 except Exception as e:
     st.error(f"Error loading the model: {e}")
     st.stop()
