@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import requests
-import tempfile
+
 
 
 # In[8]:
@@ -22,39 +22,27 @@ import tempfile
 tokenizer_url = 'https://drive.google.com/file/d/1nM-nXY308A0CtEwAUCq_Mhv5kde6yRO0/view?usp=drive_link'
 model_url = 'https://drive.google.com/file/d/1QiZrC53r_Dqn5160rGvnHGzpzTG0hbqm/view?usp=drive_link'
 
-# Download the tokenizer
+# Function to download files
 @st.cache_data
-def download_tokenizer(url):
+def download_file(url):
     response = requests.get(url)
     response.raise_for_status()
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.pkl') as tmp_file:
-        tmp_file.write(response.content)
-        return tmp_file.name
+    return response.content
 
-tokenizer_path = download_tokenizer(tokenizer_url)
-
-# Load the tokenizer
+# Download and load the tokenizer
 try:
-    with open(tokenizer_path, "rb") as f:
-        tokenizer = pickle.load(f)
+    tokenizer_data = download_file(tokenizer_url)
+    tokenizer = pickle.loads(tokenizer_data)
 except Exception as e:
     st.error(f"Error loading the tokenizer: {e}")
     st.stop()
 
-# Download the model
-@st.cache_data
-def download_model(url):
-    response = requests.get(url)
-    response.raise_for_status()
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        tmp_file.write(response.content)
-        return tmp_file.name
-
-model_path = download_model(model_url)
-
-# Load the model
+# Download and load the model
 try:
-    model = AutoModelForSequenceClassification.from_pretrained(model_path)
+    model_data = download_file(model_url)
+    with open('finbert_model.bin', 'wb') as f:
+        f.write(model_data)
+    model = AutoModelForSequenceClassification.from_pretrained('finbert_model.bin')
 except Exception as e:
     st.error(f"Error loading the model: {e}")
     st.stop()
