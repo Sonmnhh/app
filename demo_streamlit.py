@@ -19,8 +19,8 @@ import requests
 # In[8]:
 
 # Define the URLs for the tokenizer and model
-tokenizer_url = '1nM-nXY308A0CtEwAUCq_Mhv5kde6yRO0'
-model_url = '1QiZrC53r_Dqn5160rGvnHGzpzTG0hbqm'
+tokenizer_id = '1nM-nXY308A0CtEwAUCq_Mhv5kde6yRO0'
+model_id = '1QiZrC53r_Dqn5160rGvnHGzpzTG0hbqm'
 
 # Function to download files from Google Drive
 @st.cache_data
